@@ -1,5 +1,7 @@
 ﻿//Greeting and Fields
 List<string> todoList = new List<string>();
+
+
 string userInputString;
 bool userWantsToExit =  false;
 
@@ -31,6 +33,10 @@ do
             Console.WriteLine("\nExiting.");
             userWantsToExit = true;
             break;
+
+        default:
+            Console.WriteLine("\nInvalid Input... Try again.");
+            break;
     }
 
 } while (!userWantsToExit);
@@ -45,75 +51,83 @@ bool ShowAllItemsInTODOList(List<string> todoList) // Simply will show ALL items
         itemsInTodoList = false;
         return itemsInTodoList;
     }
-    else
+
+    for(int i = 0; i < todoList.Count; i++)
     {
-        for(int i = 0; i < todoList.Count; i++)
-        {
-            Console.WriteLine($"{i+1}. {todoList[i]}");
-        }
+        Console.WriteLine($"{i + 1}. {todoList[i]}");
     }
+    
     return itemsInTodoList;
 }
 
 void AddAnItemToTODOList(List<string> todoList)
 {
     string userAddedDescription;
-    Console.WriteLine("Enter the TODO description: ");
-    userAddedDescription = Console.ReadLine();
-
-    if (userAddedDescription.Trim() == "") // Checks if Description is empty
+    bool checkPassed = false;
+    do
     {
-        Console.WriteLine("\nThe description cannot be empty.\n");
-        AddAnItemToTODOList(todoList);
-    }
+        Console.WriteLine("What would you like to add to the TODO List: ");
+        userAddedDescription = Console.ReadLine();
+        checkPassed = ChecksUserDescription(userAddedDescription);
 
-    else if(todoList.Contains(userAddedDescription)) // Checks if the Description already exists in the TODO List
-    {
-        Console.WriteLine("\nThe description must be unique.\n");
-        AddAnItemToTODOList(todoList);
-    }
+    } while (!checkPassed);
 
-    else // If all else is false, then add the item to the List
-    {
-        Console.WriteLine($"\nTODO successfully added: {userAddedDescription}");
-        todoList.Add(userAddedDescription);
-    }
+     Console.WriteLine($"\nTODO successfully added: {userAddedDescription}");
+     todoList.Add(userAddedDescription);
 }
 
 void RemoveAnItemFromTODOList(List<string> todoList)
 {
-    string inputInt;
-    bool wasSuccesful;
-    int userInputIndex;
-
-    Console.WriteLine("Select the index of the TODO you want to remove: \n");
     if (!ShowAllItemsInTODOList(todoList)) return;
+
+    
+    AbleToRemoveItemFromListLogic(out int userInputIndex, todoList);
+
+
+    Console.WriteLine($"\nRemoved: {todoList[userInputIndex - 1]}");
+    todoList.RemoveAt(userInputIndex - 1);
+}
+bool ChecksUserDescription(string desc)
+{
+   if (desc.Trim() == "") // Checks if Description is empty
+   {
+        Console.WriteLine("\nThe description cannot be empty.\n");
+        return false;
+   }
+
+   else if (todoList.Contains(desc)) // Checks if the Description already exists in the TODO List
+   {
+        Console.WriteLine("\nThe description must be unique.\n");
+        return false;
+   }
+
+    return true;
+        
+}
+
+void AbleToRemoveItemFromListLogic(out int inputAsInt, List<string> todoList)
+{
+    bool isSuccessful = false;
 
     do
     {
-        Console.Write("Which item would you like to remove? (Provide Index): ");
-        inputInt = Console.ReadLine();
+        Console.WriteLine("Enter the index of the TODO you want to remove: ");
+        string userInputString = Console.ReadLine();
+        isSuccessful = int.TryParse(userInputString, out inputAsInt);
 
-        wasSuccesful = int.TryParse(inputInt, out userInputIndex);
 
-        if (!wasSuccesful)
+        if (!isSuccessful)
         {
-            Console.WriteLine("You did not input a valid number/character. Try again.\n");
+            Console.WriteLine("\nYou did not input a valid number/character. Try again.\n");
+           continue;
+
+        }
+        else if (((inputAsInt - 1) <= 0) || ((inputAsInt) > todoList.Count))
+        {
+            Console.WriteLine("\nSelected index is out of range\n");
+            isSuccessful = false;
         }
 
-        if ( ((userInputIndex - 1) <= todoList.Count) && ((userInputIndex - 1) > -1)) 
-        {
-            Console.WriteLine($"Removed: {todoList[userInputIndex - 1]}");
-            todoList.RemoveAt(userInputIndex - 1);
-            
-        }
-        else
-        {
-            Console.WriteLine("Selected index cannot be empty\n");
-            wasSuccesful = false;
-        }
+    } while (!isSuccessful); // Prompts the user to input the Index of the item they want to remove from the list, starts at 1
 
-    } while (!wasSuccesful); // Prompts the user to input the Index of the item they want to remove from the list, starts at 1
-    
 }
-
